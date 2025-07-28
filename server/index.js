@@ -42,6 +42,15 @@ app.use(helmet());
 app.use(limiter);
 
 
+// TEMPORARY DEBUG ROUTE - REMOVE AFTER FIXING
+app.get('/debug-env', (req, res) => {
+  console.log('--- DEBUGGING ENVIRONMENT VARIABLES ---');
+  console.log('My JWT_SECRET is:', process.env.JWT_SECRET);
+  console.log('My MONGO_URI is:', process.env.MONGO_URI ? 'Set' : 'Not Set');
+  console.log('My NODE_ENV is:', process.env.NODE_ENV);
+  res.send('Debug information has been logged to the server console.');
+});
+
 // Main Routes
 app.get("/", (req, res) => {
   res.send("API is running...");
