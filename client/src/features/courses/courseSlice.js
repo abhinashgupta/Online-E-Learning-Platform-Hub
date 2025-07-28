@@ -14,12 +14,12 @@ export const createCourse = createAsyncThunk(
   "courses/create",
   async (courseData, thunkAPI) => {
     try {
-      const token = thunkAPI.getState().auth.user.token; // Placeholder for token
-      return await courseService.createCourse(courseData, token);
+      return await courseService.createCourse(courseData);
     } catch (error) {
       const message =
-        error.response?.data?.message || error.message || error.toString();
-      return thunkAPI.rejectWithValue(message);
+        (error.response?.data?.message) || error.message || error.toString();
+      const authMessage = thunkAPI.getState().auth.message;
+      return thunkAPI.rejectWithValue(authMessage | message);
     }
   }
 );

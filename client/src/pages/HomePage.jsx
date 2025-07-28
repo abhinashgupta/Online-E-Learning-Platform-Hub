@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { getCourses, reset } from "../features/courses/courseSlice";
+import { toast } from "react-toastify";
 import Spinner from "../components/Spinner";
 
 function HomePage() {
@@ -9,15 +10,22 @@ function HomePage() {
     (state) => state.courses
   );
 
+  // This useEffect handles watching for errors and showing notifications.
   useEffect(() => {
     if (isError) {
-      console.log(message);
+      toast.error(message || "Failed to fetch courses.");
     }
+  }, [isError, message]);
+
+  // This useEffect handles fetching the data ONLY ONCE when the component mounts.
+  useEffect(() => {
     dispatch(getCourses());
+
+    // This is a cleanup function that runs when the component unmounts.
     return () => {
       dispatch(reset());
     };
-  }, [dispatch, isError, message]);
+  }, [dispatch]); // The dependency array ensures this runs only once.
 
   if (isLoading) {
     return <Spinner />;
@@ -29,7 +37,7 @@ function HomePage() {
         Explore Our Courses
       </h1>
       <div className="grid md:grid-cols-3 gap-4">
-        {courses.length > 0 ? (
+        {courses && courses.length > 0 ? (
           courses.map((course) => (
             <div key={course._id} className="border rounded-lg p-4">
               <img

@@ -21,7 +21,11 @@ function LoginPage() {
     if (isSuccess || user) {
       navigate("/dashboard");
     }
-    dispatch(reset());
+
+    // This is the cleanup function. It runs when the component unmounts.
+    return () => {
+      dispatch(reset());
+    };
   }, [user, isError, isSuccess, message, navigate, dispatch]);
 
   const onChange = (e) => {

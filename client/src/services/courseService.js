@@ -1,13 +1,14 @@
 import axios from "axios";
 
 // NOTE: Your deployed backend URL should be in /client/.env
-const API_URL = process.env.REACT_APP_API_URL + "/courses/";
+const API_URL = process.env.REACT_APP_API_URL + "/api/courses";
 
 const createCourse = async (courseData, token) => {
   // We need a token for protected routes
+  const user = JSON.parse(localStorage.getItem('user'));
   const config = {
     headers: {
-      Authorization: `Bearer ${token}`, // This is a placeholder; real auth is cookie-based
+      Authorization: `Bearer ${user.token}`, // This is a placeholder; real auth is cookie-based
       "Content-Type": "multipart/form-data",
     },
   };
