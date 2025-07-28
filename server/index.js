@@ -26,7 +26,6 @@ if (process.env.NODE_ENV !== "production") {
   dotenv.config();
 }
 
-dotenv.config();
 connectDB();
 
 const app = express();
