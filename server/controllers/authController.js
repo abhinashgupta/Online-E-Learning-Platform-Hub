@@ -4,7 +4,7 @@ const generateToken = require("../utils/generateToken.js");
 // @desc    Register a new user
 // @route   POST /api/users/register
 // @access  Public
-const registerUser = async (req, res) => {
+const registerUser = async (req, res,next) => {
   try {
     const { name, email, password, role } = req.body;
 
@@ -42,7 +42,7 @@ const registerUser = async (req, res) => {
 // @desc    Auth user & get token
 // @route   POST /api/users/login
 // @access  Public
-const loginUser = async (req, res) => {
+const loginUser = async (req, res,next) => {
  try {
    const { email, password } = req.body;
 
