@@ -6,7 +6,9 @@ const {
   getCourses,
   getCourseById,
   createCourse,
+  updateCourse,
   enrollInCourse,
+  getMyCourses,
 } = require("../controllers/courseController.js");
 
 const { protect, authorize } = require("../middleware/authMiddleware.js");
@@ -31,6 +33,23 @@ router.post(
   createCourse
 );
 
+
+// @route   PUT /api/courses/:id
+router.put(
+  '/:id',
+  protect,
+  authorize('instructor'),
+  upload.single('thumbnail'), // Allow thumbnail to be updated
+  [
+    param('id', 'Invalid Course ID format').isMongoId(),
+    body('title', 'Title is required').optional().not().isEmpty(),
+    body('description', 'Description is required').optional().not().isEmpty(),
+    body('price', 'Price must be a valid number').optional().isNumeric(),
+  ],
+  validate,
+  updateCourse
+);
+
 // @route   GET /api/courses/:id
 router.get(
   "/:id",
@@ -48,5 +67,9 @@ router.post(
   validate,
   enrollInCourse
 );
+
+
+// @route   GET /api/courses/mycourses
+router.get('/mycourses', protect, authorize('instructor'), getMyCourses);
 
 module.exports = router;

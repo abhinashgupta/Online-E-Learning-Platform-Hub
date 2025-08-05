@@ -28,7 +28,7 @@ function Header() {
             </li>
             {user.role === "instructor" && (
               <li>
-                <Link to="/create-course">Create Course</Link>
+                <Link to="/dashboard">My Dashboard</Link>
               </li>
             )}
             <li>

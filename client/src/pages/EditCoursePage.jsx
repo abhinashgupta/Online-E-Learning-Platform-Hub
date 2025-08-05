@@ -1,11 +1,22 @@
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import { createCourse, reset } from "../features/courses/courseSlice";
+import { useNavigate, useParams } from "react-router-dom";
+import {
+  updateCourse,
+  getCourseById,
+  reset,
+} from "../features/courses/courseSlice";
 import { toast } from "react-toastify";
 import Spinner from "../components/Spinner";
 
-function CreateCourse() {
+function EditCoursePage() {
+  const { id: courseId } = useParams();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const { selectedCourse, isLoading, isError, isSuccess, message } =
+    useSelector((state) => state.courses);
+
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -14,27 +25,34 @@ function CreateCourse() {
   const [thumbnail, setThumbnail] = useState(null);
   const { title, description, price } = formData;
 
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
+  useEffect(() => {
+    if (isError) {
+      toast.error(message);
+    }
 
-  const { isLoading, isError, isSuccess, message } = useSelector(
-    (state) => state.courses
-  );
+    if (isSuccess) {
+      toast.success("Course updated successfully!");
+      navigate("/dashboard");
+    }
 
-useEffect(() => {
-  if (isError) {
-    toast.error(message);
-  }
-  if (isSuccess) {
-    toast.success("Course Created!");
-    navigate("/");
-  }
+    // On page load, fetch the course details to pre-fill the form
+    dispatch(getCourseById(courseId));
 
-  // Move the reset call into the cleanup function
-  return () => {
-    dispatch(reset());
-  };
-}, [isError, isSuccess, message, navigate, dispatch]);
+    return () => {
+      dispatch(reset());
+    };
+  }, [courseId, dispatch, isError, isSuccess, message, navigate]);
+
+  // When the course data is loaded, update the form state
+  useEffect(() => {
+    if (selectedCourse) {
+      setFormData({
+        title: selectedCourse.title,
+        description: selectedCourse.description,
+        price: selectedCourse.price,
+      });
+    }
+  }, [selectedCourse]);
 
   const onChange = (e) => {
     setFormData((prevState) => ({
@@ -53,12 +71,14 @@ useEffect(() => {
     courseData.append("title", title);
     courseData.append("description", description);
     courseData.append("price", price);
-    courseData.append("thumbnail", thumbnail);
+    if (thumbnail) {
+      courseData.append("thumbnail", thumbnail);
+    }
 
-    dispatch(createCourse(courseData));
+    dispatch(updateCourse({ courseId, courseData }));
   };
 
-  if (isLoading) {
+  if (isLoading || !selectedCourse) {
     return <Spinner />;
   }
 
@@ -68,7 +88,7 @@ useEffect(() => {
         onSubmit={onSubmit}
         className="w-full max-w-lg p-8 space-y-6 bg-white rounded-lg shadow-md"
       >
-        <h1 className="text-2xl font-bold text-center">Create a New Course</h1>
+        <h1 className="text-2xl font-bold text-center">Edit Course</h1>
         <input
           type="text"
           name="title"
@@ -97,25 +117,24 @@ useEffect(() => {
         />
         <div>
           <label className="block mb-2 text-sm font-medium text-gray-900">
-            Upload Thumbnail
+            Upload New Thumbnail (Optional)
           </label>
           <input
             type="file"
             name="thumbnail"
             onChange={onFileChange}
-            required
             className="w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50"
           />
         </div>
         <button
           type="submit"
-          className="w-full px-4 py-2 font-bold text-white bg-blue-500 rounded-md"
+          className="w-full px-4 py-2 font-bold text-white bg-green-500 rounded-md"
         >
-          Create Course
+          Update Course
         </button>
       </form>
     </div>
   );
 }
 
-export default CreateCourse;
+export default EditCoursePage;

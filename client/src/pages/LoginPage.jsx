@@ -22,7 +22,8 @@ function LoginPage() {
       navigate("/dashboard");
     }
 
-    // This is the cleanup function. It runs when the component unmounts.
+    // This is the cleanup function.
+    // It runs ONLY when the component unmounts, which prevents the loop.
     return () => {
       dispatch(reset());
     };

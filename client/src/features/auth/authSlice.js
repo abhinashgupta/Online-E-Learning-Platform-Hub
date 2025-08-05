@@ -1,7 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import authService from "../../services/authService";
 
-// Get user from localStorage
 const user = JSON.parse(localStorage.getItem("user"));
 
 const initialState = {
@@ -12,6 +11,26 @@ const initialState = {
   message: "",
 };
 
+// --- Helper function to extract error messages ---
+const extractErrorMessage = (error) => {
+  // Check for express-validator errors array first
+  if (error.response?.data?.errors) {
+    return error.response.data.errors
+      .map((err) => Object.values(err)[0])
+      .join("\n");
+  }
+  // Check for standard backend JSON error message
+  if (error.response?.data?.message) {
+    return error.response.data.message;
+  }
+  // Check for plain text error from rate limiter or other middleware
+  if (typeof error.response?.data === "string") {
+    return error.response.data;
+  }
+  // Fallback
+  return error.message || error.toString();
+};
+
 // Register user
 export const register = createAsyncThunk(
   "auth/register",
@@ -19,9 +38,7 @@ export const register = createAsyncThunk(
     try {
       return await authService.register(user);
     } catch (error) {
-      const message =
-        error.response?.data?.message || error.message || error.toString();
-      return thunkAPI.rejectWithValue(message);
+      return thunkAPI.rejectWithValue(extractErrorMessage(error));
     }
   }
 );
@@ -31,9 +48,7 @@ export const login = createAsyncThunk("auth/login", async (user, thunkAPI) => {
   try {
     return await authService.login(user);
   } catch (error) {
-    const message =
-      error.response?.data?.message || error.message || error.toString();
-    return thunkAPI.rejectWithValue(message);
+    return thunkAPI.rejectWithValue(extractErrorMessage(error));
   }
 });
 

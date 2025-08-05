@@ -1,30 +1,42 @@
 const jwt = require("jsonwebtoken");
-const User= require("../models/User.js");
+const User = require("../models/User.js");
 
-// Protect routes - user must be logged in
 const protect = async (req, res, next) => {
   let token;
 
-  // Read JWT from the 'jwt' cookie
-  token = req.cookies.jwt;
-
-  if (token) {
+  // Check the authorization header for the token
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer")
+  ) {
     try {
+      // Get token from header (e.g., "Bearer eyJ...")
+      token = req.headers.authorization.split(" ")[1];
+
+      // Verify token
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+      // Get user from the token and attach to request object
       req.user = await User.findById(decoded.userId).select("-password");
+
+      if (!req.user) {
+        res.status(401);
+        throw new Error("Not authorized, user not found");
+      }
+
       next();
     } catch (error) {
-      console.error(error);
       res.status(401);
       throw new Error("Not authorized, token failed");
     }
-  } else {
+  }
+
+  if (!token) {
     res.status(401);
     throw new Error("Not authorized, no token");
   }
 };
 
-// Grant access to specific roles
 const authorize = (...roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {
@@ -37,4 +49,4 @@ const authorize = (...roles) => {
   };
 };
 
-module.exports = {protect , authorize}
+module.exports = { protect, authorize };
